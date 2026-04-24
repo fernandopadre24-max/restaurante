@@ -29,18 +29,21 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    if (!auth) {
+      setLoading(false);
+      return;
+    }
+
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
       setUser(user);
       if (user) {
-        // Fetch user profile from Firestore if needed, 
-        // for now we'll mock it or try to fetch from a 'users' collection
+        // Fetch user profile from Firestore
         const docRef = doc(db, "employees", user.uid);
         const docSnap = await getDoc(docRef);
         
         if (docSnap.exists()) {
-          setProfile(docSnap.data() as UserProfile);
+          setProfile(docSnap.data() as Employee);
         } else {
-          // If not in employees, maybe a default or check by email
           setProfile({ name: user.displayName || user.email?.split('@')[0] || 'User', role: 'Garçom' });
         }
       } else {
