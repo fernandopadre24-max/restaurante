@@ -12,7 +12,7 @@ import {
   User 
 } from "firebase/auth";
 import { auth, db } from "@/lib/firebase";
-import { doc, getDoc, setDoc, serverTimestamp } from "firebase/firestore";
+import { doc, getDoc, setDoc, serverTimestamp, getFirestore } from "firebase/firestore";
 import { Employee } from "@/types/restaurant";
 
 interface AuthContextType {
@@ -34,11 +34,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   // Garante que o documento do funcionário exista no Firestore
   const syncProfile = async (firebaseUser: User, customName?: string) => {
+    console.log("[AuthContext] Sincronizando perfil para:", firebaseUser.uid);
     try {
       const docRef = doc(db, "employees", firebaseUser.uid);
       const docSnap = await getDoc(docRef);
 
       if (!docSnap.exists()) {
+        console.log("[AuthContext] Perfil não encontrado, criando novo...");
         const newProfile: Partial<Employee> = {
           id: firebaseUser.uid,
           name: customName || firebaseUser.displayName || firebaseUser.email?.split('@')[0] || 'Novo Usuário',
@@ -51,12 +53,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           ...newProfile,
           createdAt: serverTimestamp(),
         });
+        console.log("[AuthContext] Perfil criado com sucesso");
         setProfile(newProfile);
       } else {
+        console.log("[AuthContext] Perfil carregado do Firestore");
         setProfile(docSnap.data() as Employee);
       }
     } catch (error) {
-      console.error("Erro ao sincronizar perfil:", error);
+      console.error("[AuthContext] Erro ao sincronizar perfil:", error);
       // Fallback para não travar o app
       setProfile({ 
         name: firebaseUser.displayName || firebaseUser.email?.split('@')[0] || 'Usuário', 
@@ -66,7 +70,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   useEffect(() => {
+    console.log("[AuthContext] Inicializando onAuthStateChanged...");
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
+      console.log("[AuthContext] Estado de auth mudou:", firebaseUser ? "Logado" : "Deslogado");
       if (firebaseUser) {
         setUser(firebaseUser);
         await syncProfile(firebaseUser);
@@ -75,13 +81,24 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         setProfile(null);
       }
       setLoading(false);
+      console.log("[AuthContext] Carregamento finalizado");
+    }, (error) => {
+      console.error("[AuthContext] Erro crítico no onAuthStateChanged:", error);
+      setLoading(false);
     });
 
     return () => unsubscribe();
   }, []);
 
   const login = async (email: string, pass: string) => {
-    await signInWithEmailAndPassword(auth, email, pass);
+    console.log("[AuthContext] Tentando login para:", email);
+    try {
+      await signInWithEmailAndPassword(auth, email, pass);
+      console.log("[AuthContext] Login bem-sucedido");
+    } catch (error: any) {
+      console.error("[AuthContext] Falha no login:", error.code, error.message);
+      throw error;
+    }
   };
 
   const register = async (name: string, email: string, pass: string) => {

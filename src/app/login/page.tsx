@@ -44,6 +44,8 @@ export default function LoginPage() {
     setIsSubmitting(true)
     setError(null)
     
+    console.log("[LoginPage] Iniciando submissão do formulário. Modo:", isRegistering ? "Registro" : "Login");
+    
     try {
       if (isRegistering) {
         await register(name, email, password)
@@ -52,10 +54,12 @@ export default function LoginPage() {
         await login(email, password)
         toast({ title: "Bem-vindo!", description: "Login realizado com sucesso." })
       }
+      console.log("[LoginPage] Autenticação bem-sucedida, redirecionando para /...");
       router.push("/")
     } catch (err: any) {
-      console.error("Erro na autenticação:", err)
-      setError(getFriendlyErrorMessage(err.code))
+      console.error("[LoginPage] Erro na autenticação:", err)
+      const friendlyMessage = getFriendlyErrorMessage(err.code);
+      setError(`${friendlyMessage} (${err.code})`)
     } finally {
       setIsSubmitting(false)
     }
@@ -64,13 +68,16 @@ export default function LoginPage() {
   const handleGoogleLogin = async () => {
     setIsSubmitting(true)
     setError(null)
+    console.log("[LoginPage] Iniciando login com Google...");
     try {
       await loginWithGoogle()
       toast({ title: "Bem-vindo!", description: "Login com Google realizado com sucesso." })
+      console.log("[LoginPage] Google login bem-sucedido, redirecionando...");
       router.push("/")
     } catch (err: any) {
-      console.error("Erro no login Google:", err)
-      setError(getFriendlyErrorMessage(err.code))
+      console.error("[LoginPage] Erro no login Google:", err)
+      const friendlyMessage = getFriendlyErrorMessage(err.code);
+      setError(`${friendlyMessage} (${err.code})`)
     } finally {
       setIsSubmitting(false)
     }
