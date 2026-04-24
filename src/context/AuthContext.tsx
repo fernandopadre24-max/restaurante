@@ -5,13 +5,14 @@ import React, { createContext, useContext, useEffect, useState } from "react";
 import { 
   onAuthStateChanged, 
   signInWithEmailAndPassword, 
+  createUserWithEmailAndPassword,
   signInWithPopup,
   GoogleAuthProvider,
   signOut, 
   User 
 } from "firebase/auth";
 import { auth, db } from "@/lib/firebase";
-import { doc, getDoc } from "firebase/firestore";
+import { doc, getDoc, setDoc } from "firebase/firestore";
 
 import { Employee } from "@/types/restaurant";
 
@@ -20,6 +21,7 @@ interface AuthContextType {
   profile: Partial<Employee> | null;
   loading: boolean;
   login: (email: string, pass: string) => Promise<void>;
+  register: (name: string, email: string, pass: string) => Promise<void>;
   loginWithGoogle: () => Promise<void>;
   logout: () => Promise<void>;
 }
@@ -63,6 +65,20 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     await signInWithEmailAndPassword(auth, email, pass);
   };
 
+  const register = async (name: string, email: string, pass: string) => {
+    if (!auth || !db) return;
+    const { user } = await createUserWithEmailAndPassword(auth, email, pass);
+    
+    // Create initial employee profile
+    await setDoc(doc(db, "employees", user.uid), {
+      name,
+      email,
+      role: 'Garçom',
+      status: 'Ativo',
+      phone: ''
+    });
+  };
+
   const loginWithGoogle = async () => {
     if (!auth) return;
     const provider = new GoogleAuthProvider();
@@ -75,7 +91,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   return (
-    <AuthContext.Provider value={{ user, profile, loading, login, loginWithGoogle, logout }}>
+    <AuthContext.Provider value={{ user, profile, loading, login, register, loginWithGoogle, logout }}>
       {children}
     </AuthContext.Provider>
   );

@@ -12,10 +12,12 @@ import { ChefHat, Lock, Mail, Loader2 } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
 
 export default function LoginPage() {
+  const [isRegistering, setIsRegistering] = useState(false)
+  const [name, setName] = useState("")
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [isSubmitting, setIsSubmitting] = useState(false)
-  const { login, loginWithGoogle } = useAuth()
+  const { login, register, loginWithGoogle } = useAuth()
   const { toast } = useToast()
   const router = useRouter()
 
@@ -23,16 +25,24 @@ export default function LoginPage() {
     e.preventDefault()
     setIsSubmitting(true)
     try {
-      await login(email, password)
-      toast({
-        title: "Bem-vindo!",
-        description: "Login realizado com sucesso.",
-      })
+      if (isRegistering) {
+        await register(name, email, password)
+        toast({
+          title: "Conta criada!",
+          description: "Sua conta foi criada com sucesso.",
+        })
+      } else {
+        await login(email, password)
+        toast({
+          title: "Bem-vindo!",
+          description: "Login realizado com sucesso.",
+        })
+      }
       router.push("/")
     } catch (error: any) {
       toast({
-        title: "Erro no login",
-        description: "Verifique suas credenciais e tente novamente.",
+        title: isRegistering ? "Erro ao criar conta" : "Erro no login",
+        description: error.message || "Verifique seus dados e tente novamente.",
         variant: "destructive",
       })
     } finally {
@@ -63,16 +73,35 @@ export default function LoginPage() {
       
       <Card className="w-full max-w-md relative z-10 border-none shadow-2xl">
         <CardHeader className="space-y-4 flex flex-col items-center">
-          <div className="bg-primary p-4 rounded-2xl shadow-lg shadow-primary/20">
+          <div className="bg-primary p-4 rounded-2xl shadow-lg shadow-primary/20 transition-all duration-300 transform hover:scale-110">
             <ChefHat className="h-10 w-10 text-white" />
           </div>
           <div className="text-center space-y-1">
             <CardTitle className="text-3xl font-black tracking-tight">ChefPro</CardTitle>
-            <CardDescription className="text-base">Acesse o sistema de gestão do restaurante</CardDescription>
+            <CardDescription className="text-base">
+              {isRegistering ? "Crie sua conta para começar" : "Acesse o sistema de gestão do restaurante"}
+            </CardDescription>
           </div>
         </CardHeader>
         <form onSubmit={handleSubmit}>
           <CardContent className="space-y-4 pt-4">
+            {isRegistering && (
+              <div className="space-y-2 animate-in slide-in-from-top-2 duration-300">
+                <Label htmlFor="name">Nome Completo</Label>
+                <div className="relative">
+                  <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground opacity-0" />
+                  <Input 
+                    id="name" 
+                    type="text" 
+                    placeholder="Seu nome completo" 
+                    className="h-12"
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    required={isRegistering}
+                  />
+                </div>
+              </div>
+            )}
             <div className="space-y-2">
               <Label htmlFor="email">E-mail</Label>
               <div className="relative">
@@ -115,12 +144,22 @@ export default function LoginPage() {
               {isSubmitting ? (
                 <>
                   <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-                  ENTRANDO...
+                  {isRegistering ? "CRIANDO CONTA..." : "ENTRANDO..."}
                 </>
               ) : (
-                "ENTRAR NO SISTEMA"
+                isRegistering ? "CRIAR MINHA CONTA" : "ENTRAR NO SISTEMA"
               )}
             </Button>
+
+            <div className="text-center">
+              <button 
+                type="button" 
+                onClick={() => setIsRegistering(!isRegistering)}
+                className="text-sm font-medium text-primary hover:underline transition-all"
+              >
+                {isRegistering ? "Já tem uma conta? Entre aqui" : "Ainda não tem conta? Crie uma agora"}
+              </button>
+            </div>
 
             <div className="relative w-full py-2">
               <div className="absolute inset-0 flex items-center">
