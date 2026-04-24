@@ -18,12 +18,12 @@ let app;
 let db: any;
 let auth: any;
 
-if (firebaseConfig.apiKey) {
+if (firebaseConfig.apiKey && firebaseConfig.apiKey !== "" && firebaseConfig.apiKey !== "undefined") {
   app = getApps().length > 0 ? getApp() : initializeApp(firebaseConfig);
   db = getFirestore(app);
   auth = getAuth(app);
 } else {
-  console.warn("Firebase configuration missing. Check your environment variables.");
+  console.warn("Firebase configuration missing or invalid. Check your environment variables.");
 }
 
 export { app, db, auth };
