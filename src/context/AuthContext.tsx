@@ -12,8 +12,7 @@ import {
   User 
 } from "firebase/auth";
 import { auth, db } from "@/lib/firebase";
-import { doc, getDoc, setDoc } from "firebase/firestore";
-
+import { doc, getDoc, setDoc, serverTimestamp } from "firebase/firestore";
 import { Employee } from "@/types/restaurant";
 
 interface AuthContextType {
@@ -33,72 +32,78 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [profile, setProfile] = useState<Partial<Employee> | null>(null);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    if (!auth) {
-      setLoading(false);
-      return;
-    }
+  // Garante que o documento do funcionário exista no Firestore
+  const syncProfile = async (firebaseUser: User, customName?: string) => {
+    try {
+      const docRef = doc(db, "employees", firebaseUser.uid);
+      const docSnap = await getDoc(docRef);
 
-    const unsubscribe = onAuthStateChanged(auth, async (user) => {
-      try {
-        setUser(user);
-        if (user) {
-          const docRef = doc(db, "employees", user.uid);
-          const docSnap = await getDoc(docRef);
-          
-          if (docSnap.exists()) {
-            setProfile(docSnap.data() as Employee);
-          } else {
-            setProfile({ name: user.displayName || user.email?.split('@')[0] || 'User', role: 'Garçom' });
-          }
-        } else {
-          setProfile(null);
-        }
-      } catch (error) {
-        console.error("Erro ao carregar perfil:", error);
-        // Mesmo com erro, permite o acesso básico
-        if (user) setProfile({ name: user.displayName || 'User', role: 'Garçom' });
-      } finally {
-        setLoading(false);
+      if (!docSnap.exists()) {
+        const newProfile: Partial<Employee> = {
+          id: firebaseUser.uid,
+          name: customName || firebaseUser.displayName || firebaseUser.email?.split('@')[0] || 'Novo Usuário',
+          email: firebaseUser.email || '',
+          role: 'Garçom',
+          status: 'Ativo',
+          phone: '',
+        };
+        await setDoc(docRef, {
+          ...newProfile,
+          createdAt: serverTimestamp(),
+        });
+        setProfile(newProfile);
+      } else {
+        setProfile(docSnap.data() as Employee);
       }
+    } catch (error) {
+      console.error("Erro ao sincronizar perfil:", error);
+      // Fallback para não travar o app
+      setProfile({ 
+        name: firebaseUser.displayName || firebaseUser.email?.split('@')[0] || 'Usuário', 
+        role: 'Garçom' 
+      });
+    }
+  };
+
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
+      if (firebaseUser) {
+        setUser(firebaseUser);
+        await syncProfile(firebaseUser);
+      } else {
+        setUser(null);
+        setProfile(null);
+      }
+      setLoading(false);
     });
 
     return () => unsubscribe();
   }, []);
 
   const login = async (email: string, pass: string) => {
-    if (!auth) throw new Error("O sistema de autenticação não foi configurado. Verifique as variáveis de ambiente.");
     await signInWithEmailAndPassword(auth, email, pass);
   };
 
   const register = async (name: string, email: string, pass: string) => {
-    if (!auth || !db) throw new Error("O banco de dados não está pronto. Verifique a configuração do Firebase.");
-    const { user } = await createUserWithEmailAndPassword(auth, email, pass);
-    
-    // Create initial employee profile
-    await setDoc(doc(db, "employees", user.uid), {
-      name,
-      email,
-      role: 'Garçom',
-      status: 'Ativo',
-      phone: ''
-    });
+    const { user: firebaseUser } = await createUserWithEmailAndPassword(auth, email, pass);
+    await syncProfile(firebaseUser, name);
   };
 
   const loginWithGoogle = async () => {
-    if (!auth) throw new Error("Login social indisponível no momento.");
     const provider = new GoogleAuthProvider();
-    await signInWithPopup(auth, provider);
+    // Forçar seleção de conta para evitar erros de cache
+    provider.setCustomParameters({ prompt: 'select_account' });
+    const result = await signInWithPopup(auth, provider);
+    await syncProfile(result.user);
   };
 
   const logout = async () => {
-    if (!auth) return;
     await signOut(auth);
   };
 
   return (
     <AuthContext.Provider value={{ user, profile, loading, login, register, loginWithGoogle, logout }}>
-      {children}
+      {!loading && children}
     </AuthContext.Provider>
   );
 }
