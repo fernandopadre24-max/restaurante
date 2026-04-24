@@ -92,6 +92,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const login = async (email: string, pass: string) => {
     console.log("[AuthContext] Tentando login para:", email);
+    if (!auth || !auth.app) {
+      throw new Error("O sistema de autenticação não foi configurado. Verifique as variáveis de ambiente.");
+    }
     try {
       await signInWithEmailAndPassword(auth, email, pass);
       console.log("[AuthContext] Login bem-sucedido");
@@ -102,11 +105,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   const register = async (name: string, email: string, pass: string) => {
+    if (!auth || !auth.app) {
+      throw new Error("O sistema de autenticação não foi configurado. Verifique as variáveis de ambiente.");
+    }
     const { user: firebaseUser } = await createUserWithEmailAndPassword(auth, email, pass);
     await syncProfile(firebaseUser, name);
   };
 
   const loginWithGoogle = async () => {
+    if (!auth || !auth.app) {
+      throw new Error("O sistema de autenticação não foi configurado. Verifique as variáveis de ambiente.");
+    }
     const provider = new GoogleAuthProvider();
     // Forçar seleção de conta para evitar erros de cache
     provider.setCustomParameters({ prompt: 'select_account' });

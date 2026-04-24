@@ -59,7 +59,11 @@ export default function LoginPage() {
     } catch (err: any) {
       console.error("[LoginPage] Erro na autenticação:", err)
       const friendlyMessage = getFriendlyErrorMessage(err.code);
-      setError(`${friendlyMessage} (${err.code})`)
+      if (err.code) {
+        setError(`${friendlyMessage} (${err.code})`)
+      } else {
+        setError(err.message || friendlyMessage)
+      }
     } finally {
       setIsSubmitting(false)
     }
@@ -77,7 +81,11 @@ export default function LoginPage() {
     } catch (err: any) {
       console.error("[LoginPage] Erro no login Google:", err)
       const friendlyMessage = getFriendlyErrorMessage(err.code);
-      setError(`${friendlyMessage} (${err.code})`)
+      if (err.code) {
+        setError(`${friendlyMessage} (${err.code})`)
+      } else {
+        setError(err.message || friendlyMessage)
+      }
     } finally {
       setIsSubmitting(false)
     }
