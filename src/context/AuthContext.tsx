@@ -61,12 +61,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const login = async (email: string, pass: string) => {
-    if (!auth) return;
+    if (!auth) throw new Error("O sistema de autenticação não foi configurado. Verifique as variáveis de ambiente.");
     await signInWithEmailAndPassword(auth, email, pass);
   };
 
   const register = async (name: string, email: string, pass: string) => {
-    if (!auth || !db) return;
+    if (!auth || !db) throw new Error("O banco de dados não está pronto. Verifique a configuração do Firebase.");
     const { user } = await createUserWithEmailAndPassword(auth, email, pass);
     
     // Create initial employee profile
@@ -80,7 +80,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   const loginWithGoogle = async () => {
-    if (!auth) return;
+    if (!auth) throw new Error("Login social indisponível no momento.");
     const provider = new GoogleAuthProvider();
     await signInWithPopup(auth, provider);
   };
