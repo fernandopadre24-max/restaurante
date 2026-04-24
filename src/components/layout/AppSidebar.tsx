@@ -13,6 +13,7 @@ import {
 } from "lucide-react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
+import { useAuth } from "@/context/AuthContext"
 
 import {
   Sidebar,
@@ -36,6 +37,7 @@ const menuItems = [
 
 export function AppSidebar() {
   const pathname = usePathname()
+  const { logout } = useAuth()
 
   return (
     <Sidebar className="border-r bg-sidebar">
@@ -77,7 +79,10 @@ export function AppSidebar() {
       <SidebarFooter className="p-4 mt-auto">
         <SidebarMenu>
           <SidebarMenuItem>
-            <SidebarMenuButton className="flex gap-3 py-6 px-4 rounded-xl hover:bg-destructive/10 hover:text-destructive transition-colors">
+            <SidebarMenuButton 
+              onClick={() => logout()}
+              className="flex gap-3 py-6 px-4 rounded-xl hover:bg-destructive/10 hover:text-destructive transition-colors"
+            >
               <LogOut className="h-5 w-5" />
               <span className="font-medium text-base">Sair</span>
             </SidebarMenuButton>

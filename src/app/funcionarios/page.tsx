@@ -23,15 +23,11 @@ import {
   DropdownMenuTrigger 
 } from "@/components/ui/dropdown-menu"
 
-const staff = [
-  { id: 1, name: "Ricardo Almeida", role: "Gerente", email: "ricardo@chefpro.com", phone: "(11) 98765-4321", status: "Ativo" },
-  { id: 2, name: "Juliana Silva", role: "Garçom", email: "juliana@chefpro.com", phone: "(11) 91234-5678", status: "Ativo" },
-  { id: 3, name: "Marcos Oliveira", role: "Cozinheiro", email: "marcos@chefpro.com", phone: "(11) 95555-4444", status: "Ativo" },
-  { id: 4, name: "Ana Beatriz", role: "Garçom", email: "ana@chefpro.com", phone: "(11) 94444-3333", status: "Férias" },
-  { id: 5, name: "Sérgio Mendes", role: "Garçom", email: "sergio@chefpro.com", phone: "(11) 92222-1111", status: "Ativo" },
-]
+import { useRestaurant } from "@/context/RestaurantContext"
 
 export default function FuncionariosPage() {
+  const { employees, addEmployee, updateEmployee, removeEmployee } = useRestaurant()
+
   return (
     <div className="space-y-8 animate-in fade-in duration-500">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
@@ -39,13 +35,22 @@ export default function FuncionariosPage() {
           <h1 className="text-3xl font-bold tracking-tight text-foreground">Gestão de Funcionários</h1>
           <p className="text-muted-foreground">Gerencie sua equipe e níveis de acesso.</p>
         </div>
-        <Button className="bg-primary text-primary-foreground hover:bg-primary/90">
+        <Button className="bg-primary text-primary-foreground hover:bg-primary/90" onClick={() => {
+          // Placeholder for adding new employee - in a real app this would open a dialog
+          addEmployee({
+            name: "Novo Funcionário",
+            role: "Garçom",
+            email: "novo@chefpro.com",
+            phone: "(00) 00000-0000",
+            status: "Ativo"
+          })
+        }}>
           <Plus className="h-4 w-4 mr-2" /> Novo Funcionário
         </Button>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {staff.map((person) => (
+        {employees.map((person) => (
           <Card key={person.id} className="border-none shadow-sm hover:shadow-md transition-shadow relative overflow-hidden group">
             <div className={`absolute top-0 left-0 w-1 h-full ${
               person.role === 'Gerente' ? 'bg-primary' : 'bg-accent'
@@ -76,7 +81,7 @@ export default function FuncionariosPage() {
                   <DropdownMenuSeparator />
                   <DropdownMenuItem>Editar Perfil</DropdownMenuItem>
                   <DropdownMenuItem>Alterar Permissões</DropdownMenuItem>
-                  <DropdownMenuItem className="text-destructive">Desativar Acesso</DropdownMenuItem>
+                  <DropdownMenuItem className="text-destructive" onClick={() => removeEmployee(person.id)}>Desativar Acesso</DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
             </CardHeader>

@@ -16,7 +16,8 @@ import { Badge } from "@/components/ui/badge"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Separator } from "@/components/ui/separator"
 import { useToast } from "@/hooks/use-toast"
-import { useRestaurant, TableStatus } from "@/context/RestaurantContext"
+import { useRestaurant } from "@/context/RestaurantContext"
+import { TableStatus } from "@/types/restaurant"
 import { cn } from "@/lib/utils"
 
 export default function CozinhaPage() {

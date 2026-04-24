@@ -37,17 +37,12 @@ import { Label } from "@/components/ui/label"
 import { useToast } from "@/hooks/use-toast"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
-import { useRestaurant, TableStatus } from "@/context/RestaurantContext"
+import { useRestaurant } from "@/context/RestaurantContext"
+import { TableStatus } from "@/types/restaurant"
 
-const STAFF_LIST = [
-  { id: "101", name: "Ricardo Almeida", role: "Gerente" },
-  { id: "102", name: "Juliana Silva", role: "Garçom" },
-  { id: "103", name: "Marcos Oliveira", role: "Cozinheiro" },
-  { id: "104", name: "Sérgio Mendes", role: "Garçom" },
-]
 
 export default function MesasPage() {
-  const { tables, menuItems, updateTableStatus, addItemsToTable, removeItemFromTable, openTable, closeTable } = useRestaurant()
+  const { tables, menuItems, employees, updateTableStatus, addItemsToTable, removeItemFromTable, openTable, closeTable } = useRestaurant()
   const [selectedTableId, setSelectedTableId] = useState<string | number | null>(null)
   const [searchTerm, setSearchTerm] = useState("")
   const [isDialogOpen, setIsDialogOpen] = useState(false)
@@ -93,7 +88,7 @@ export default function MesasPage() {
 
 
   const handleStaffConfirm = async () => {
-    const selectedStaff = STAFF_LIST.find(s => s.name === staffInput)
+    const selectedStaff = employees.find(s => s.name === staffInput)
     if (!selectedStaff || selectedStaff.role === 'Cozinheiro') {
       toast({
         title: "Acesso Negado",
@@ -260,7 +255,7 @@ export default function MesasPage() {
               <DialogTitle className="flex items-center gap-2"><Lock className="h-5 w-5 text-primary" /> Identificação</DialogTitle>
             </DialogHeader>
             <div className="py-6 space-y-4">
-              {STAFF_LIST.map((staff) => (
+              {employees.map((staff) => (
                 <Button
                   key={staff.id}
                   variant={staffInput === staff.name ? "default" : "outline"}
