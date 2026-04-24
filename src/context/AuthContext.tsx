@@ -5,6 +5,8 @@ import React, { createContext, useContext, useEffect, useState } from "react";
 import { 
   onAuthStateChanged, 
   signInWithEmailAndPassword, 
+  signInWithPopup,
+  GoogleAuthProvider,
   signOut, 
   User 
 } from "firebase/auth";
@@ -18,6 +20,7 @@ interface AuthContextType {
   profile: Partial<Employee> | null;
   loading: boolean;
   login: (email: string, pass: string) => Promise<void>;
+  loginWithGoogle: () => Promise<void>;
   logout: () => Promise<void>;
 }
 
@@ -56,15 +59,23 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const login = async (email: string, pass: string) => {
+    if (!auth) return;
     await signInWithEmailAndPassword(auth, email, pass);
   };
 
+  const loginWithGoogle = async () => {
+    if (!auth) return;
+    const provider = new GoogleAuthProvider();
+    await signInWithPopup(auth, provider);
+  };
+
   const logout = async () => {
+    if (!auth) return;
     await signOut(auth);
   };
 
   return (
-    <AuthContext.Provider value={{ user, profile, loading, login, logout }}>
+    <AuthContext.Provider value={{ user, profile, loading, login, loginWithGoogle, logout }}>
       {children}
     </AuthContext.Provider>
   );
