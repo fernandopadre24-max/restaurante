@@ -1,0 +1,34 @@
+{
+  "placeholderImages": [
+    {
+      "id": "restaurant-hero",
+      "description": "A clean, modern restaurant interior",
+      "imageUrl": "https://picsum.photos/seed/restaurant/1200/600",
+      "imageHint": "modern restaurant"
+    },
+    {
+      "id": "chef-working",
+      "description": "Professional chef preparing a gourmet meal",
+      "imageUrl": "https://picsum.photos/seed/chef/800/600",
+      "imageHint": "chef cooking"
+    },
+    {
+      "id": "gourmet-dish",
+      "description": "A beautifully plated Italian pasta dish",
+      "imageUrl": "https://picsum.photos/seed/pasta/400/300",
+      "imageHint": "gourmet pasta"
+    },
+    {
+      "id": "burger-premium",
+      "description": "Handmade premium cheeseburger with fries",
+      "imageUrl": "https://picsum.photos/seed/burger/400/300",
+      "imageHint": "premium burger"
+    },
+    {
+      "id": "staff-team",
+      "description": "Friendly restaurant staff standing together",
+      "imageUrl": "https://picsum.photos/seed/staff/800/600",
+      "imageHint": "restaurant staff"
+    }
+  ]
+}
