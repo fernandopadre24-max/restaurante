@@ -30,7 +30,7 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
-  const [profile, setProfile] = useState<UserProfile | null>(null);
+  const [profile, setProfile] = useState<Partial<Employee> | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -40,21 +40,27 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
 
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
-      setUser(user);
-      if (user) {
-        // Fetch user profile from Firestore
-        const docRef = doc(db, "employees", user.uid);
-        const docSnap = await getDoc(docRef);
-        
-        if (docSnap.exists()) {
-          setProfile(docSnap.data() as Employee);
+      try {
+        setUser(user);
+        if (user) {
+          const docRef = doc(db, "employees", user.uid);
+          const docSnap = await getDoc(docRef);
+          
+          if (docSnap.exists()) {
+            setProfile(docSnap.data() as Employee);
+          } else {
+            setProfile({ name: user.displayName || user.email?.split('@')[0] || 'User', role: 'Garçom' });
+          }
         } else {
-          setProfile({ name: user.displayName || user.email?.split('@')[0] || 'User', role: 'Garçom' });
+          setProfile(null);
         }
-      } else {
-        setProfile(null);
+      } catch (error) {
+        console.error("Erro ao carregar perfil:", error);
+        // Mesmo com erro, permite o acesso básico
+        if (user) setProfile({ name: user.displayName || 'User', role: 'Garçom' });
+      } finally {
+        setLoading(false);
       }
-      setLoading(false);
     });
 
     return () => unsubscribe();

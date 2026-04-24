@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
-import { ChefHat, Lock, Mail, Loader2 } from "lucide-react"
+import { ChefHat, Lock, Mail, Loader2, User as UserIcon } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
 
 export default function LoginPage() {
@@ -89,12 +89,12 @@ export default function LoginPage() {
               <div className="space-y-2 animate-in slide-in-from-top-2 duration-300">
                 <Label htmlFor="name">Nome Completo</Label>
                 <div className="relative">
-                  <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground opacity-0" />
+                  <UserIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                   <Input 
                     id="name" 
                     type="text" 
                     placeholder="Seu nome completo" 
-                    className="h-12"
+                    className="pl-10 h-12"
                     value={name}
                     onChange={(e) => setName(e.target.value)}
                     required={isRegistering}
