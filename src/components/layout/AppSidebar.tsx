@@ -37,7 +37,7 @@ const menuItems = [
 
 export function AppSidebar() {
   const pathname = usePathname()
-  const { logout } = useAuth()
+  const { user, logout } = useAuth()
 
   return (
     <Sidebar className="border-r bg-sidebar">
@@ -84,7 +84,7 @@ export function AppSidebar() {
               className="flex gap-3 py-6 px-4 rounded-xl hover:bg-destructive/10 hover:text-destructive transition-colors"
             >
               <LogOut className="h-5 w-5" />
-              <span className="font-medium text-base">Sair</span>
+              <span className="font-medium text-base">{user ? "Sair" : "Fazer Login"}</span>
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>

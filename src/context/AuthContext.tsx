@@ -78,7 +78,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         await syncProfile(firebaseUser);
       } else {
         setUser(null);
-        setProfile(null);
+        // Perfil padrão para modo livre
+        setProfile({
+          id: "guest",
+          name: "Convidado (Modo Livre)",
+          role: "Gerente",
+          email: "guest@chefpro.com",
+          status: "Ativo"
+        });
       }
       setLoading(false);
       console.log("[AuthContext] Carregamento finalizado");

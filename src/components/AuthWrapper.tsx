@@ -11,10 +11,9 @@ export function AuthWrapper({ children }: { children: React.ReactNode }) {
   const router = useRouter()
   const pathname = usePathname()
 
+  // No login redirection for free access
   useEffect(() => {
-    if (!loading && !user && pathname !== "/login") {
-      router.push("/login")
-    }
+    // Logic removed to allow free access
   }, [user, loading, pathname, router])
 
   if (loading) {
@@ -26,17 +25,6 @@ export function AuthWrapper({ children }: { children: React.ReactNode }) {
         </div>
       </div>
     )
-  }
-
-  // Se estiver na tela de login e já estiver logado, redireciona para home
-  if (user && pathname === "/login") {
-    router.push("/")
-    return null
-  }
-
-  // Se não estiver logado e não estiver na tela de login, não mostra nada enquanto redireciona
-  if (!user && pathname !== "/login") {
-    return null
   }
 
   return <>{children}</>
